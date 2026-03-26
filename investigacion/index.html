@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="styles/style.css"/>
+  <title>investigacion</title>
+</head>
+<body>
+  <h1>
+    Entrar en el mundo de los punteros y funciones en lenguajes como C o C++ es como pasar de ser un usuario de una biblioteca a tener las llaves del depósito. Es una herramienta poderosa que te permite manipular la memoria de forma directa y eficiente.
+​Aquí te explico cómo interactúan estos dos conceptos fundamentales.
+
+    ​1. Paso por Referencia (Pasar punteros a funciones)
+  </h1>
+  <p​>
+    Normalmente, cuando pasas una variable a una función, se crea una copia (paso por valor). Si modificas la variable dentro de la función, el valor original fuera de ella no cambia.
+​Al usar punteros, pasas la dirección de memoria. Esto permite que la función modifique la variable original.
+
+    ​¿Por qué usarlo?
+​Modificar variables originales: Para que los cambios persistan fuera de la función.
+​Eficiencia: No copias estructuras de datos grandes (como un array enorme), solo pasas una dirección (usualmente 8 bytes).
+​Retornar múltiples valores: Como una función solo puede devolver un return, puedes usar punteros para "devolver" más datos modificando los argumentos.
+</p>
+  <h2>
+    ​2. Punteros como Argumentos
+    
+    Imagina una función que intercambia los valores de dos números. Sin punteros, no funcionaría:
+  </h2>
+  <p>
+    void intercambiar(int *a, int *b) {
+    int temporal = *a; // Accedemos al valor en la dirección a
+    *a = *b;           // Ponemos el valor de b en la dirección de a
+    *b = temporal;     // Ponemos el temporal en la dirección de b
+}
+
+int main() {
+    int x = 10, y = 20;
+    intercambiar(&x, &y); // Enviamos las direcciones de memoria
+    // Ahora x vale 20 y y vale 10
+    return 0;
+}
+
+  </p>
+  <3>
+    3. Punteros a Funciones
+    
+​Al igual que una variable tiene una dirección, el código de una función también reside en una dirección de memoria. Un puntero a función almacena el punto de inicio del código ejecutable.
+  </3>
+  <p>
+    Sintaxis
+    
+​La sintaxis suele asustar al principio, pero sigue este patrón:
+tipo_de_retorno (*nombre_puntero)(tipo_argumentos);
+
+    ​Ejemplo:
+    
+    int sumar(int a, int b) { return a + b; }
+
+int (*operacion)(int, int); // Declaración del puntero
+operacion = sumar;           // Apunta a la función sumar
+
+int resultado = operacion(5, 3); // Llama a la función a través del puntero
+
+  </p>
+  <h4>
+    ​4. Retornar Punteros desde una Función
+  </h4>
+  <p>
+    Una función puede devolver un puntero, pero hay una regla de oro: Nunca devuelvas un puntero a una variable local de la función.
+​Mal: Devolver la dirección de una variable que se destruye al terminar la función (causa errores de segmentación).
+​Bien: Devolver un puntero a memoria dinámica (malloc) o a una variable estática.
+    </p>
+  <h5>
+    Ejercicicio.
+  </h5>
+  <p>
+    #include <stdio.h>
+
+// La función recibe un puntero al inicio y el tamaño del array
+int buscarMaximo(int *ptr, int tamano) {
+    int max = *ptr; // Empezamos asumiendo que el primero es el máximo
+
+    for (int i = 0; i < tamano; i++) {
+        // Comparamos el valor actual (al que apunta ptr) con max
+        if (*ptr > max) {
+            max = *ptr;
+        }
+        // Aritmética de punteros: movemos el puntero a la siguiente dirección
+        ptr++; 
+    }
+    return max;
+}
+
+int main() {
+    int misNumeros[] = {15, 42, 7, 89, 23};
+    int n = 5;
+
+    // Llamamos a la función pasando el nombre del array (que es la dirección del primer elemento)
+    int maximo = buscarMaximo(misNumeros, n);
+
+    printf("El valor máximo en el array es: %d\n", maximo);
+
+    return 0;
+}
+
+  </p>
+      <h6>
+        ​6. Punteros a Estructuras
+        
+​Una estructura es un bloque de memoria que contiene varios datos. Un puntero a esa estructura apunta a la dirección de memoria donde comienza ese bloque.
+      </h6>
+      <p>
+        struct Personaje {
+    char nombre[20];
+    int nivel;
+    int vida;
+};
+
+struct Personaje miHeroe = {"Aragorn", 10, 100};
+struct Personaje *ptr = &miHeroe; // El puntero guarda la dirección de la estructura
+
+        El operador Flecha (->)
+        
+​Para acceder a los miembros de una estructura a través de un puntero, podrías hacer (*ptr).nivel, pero es tedioso. Por eso existe el atajo:
+​ptr->nivel es exactamente lo mismo que (*ptr).nivel.
+      </p>
+      <h7>
+        ​7. Pasar Estructuras a Funciones
+      </h7>
+      <p>
+        Aquí es donde los punteros brillan por su eficiencia.
+​Pasar por valor: Si pasas la estructura directamente, C hace una copia de todos sus miembros. Si la estructura es grande (ej. un registro con 50 campos), esto ralentiza el programa.
+​Pasar por puntero: Solo pasas una dirección (4 u 8 bytes). Es instantáneo y permite modificar la estructura original.
+
+        ​Ejemplo Práctico: Subir de Nivel
+        
+        #include <stdio.h>
+
+struct Jugador {
+    int id;
+    int xp;
+};
+
+// Usamos un puntero para modificar al jugador original
+void ganarXP(struct Jugador *p, int cantidad) {
+    p->xp += cantidad; // Acceso directo a la memoria original
+    printf("¡ID %d ha ganado XP!\n", p->id);
+}
+
+int main() {
+    struct Jugador j1 = {1, 500};
+    
+    // Pasamos la dirección con &
+    ganarXP(&j1, 150);
+    
+    printf("XP actual de j1: %d\n", j1.xp); // Imprime 650
+    return 0;
+}
+
+      </p>
+        <h8>
+          8. Estructuras que contienen Punteros
+        </h8>
+        <p>
+          Una estructura puede tener un puntero como uno de sus miembros. Esto es la base de las estructuras de datos dinámicas.
+​Por ejemplo, un "Nodo" en una lista enlazada se apunta a sí mismo (al siguiente nodo):
+          
+          struct Nodo {
+    int dato;
+    struct Nodo *siguiente; // Puntero a otra estructura del mismo tipo
+};
+
+        </p>
+        <h9>
+          9. Asignación Dinámica de Estructuras
+        </h9>
+        <p>
+          A veces no sabes cuántas estructuras vas a necesitar (ej. cuántos enemigos aparecen en un juego). Para eso usamos malloc:
+          
+          struct Jugador *nuevo = malloc(sizeof(struct Jugador));
+nuevo->id = 2;
+nuevo->xp = 0;
+
+// ... usarlo ...
+
+free(nuevo); // ¡No olvides liberar la memoria!
+
+        </p>
+</body>
+</html>
